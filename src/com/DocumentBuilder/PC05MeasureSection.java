@@ -113,9 +113,11 @@ public class PC05MeasureSection extends Elements {
 			
 			element(doc, org, "templateId", "root", "2.16.840.1.113883.10.20.24.3.97");
 			
-			element(doc, org, "id", "root", "40280382-68d3-a5fe-0169-1622707d1a33");
+			element(doc, org, "id", "root", "40280381-4b9a-3825-014b-c21e526d0806");
 			
-			Element ref = element(doc, org, "statusCode", "typeCode", "REFR");
+			element(doc, org, "statusCode", "code", "completed");
+			
+			Element ref = element(doc, org, "reference", "typeCode", "REFR");
 			
 			Element exDoc = element(doc, ref, "externalDocument", "classCode", "DOC", "moodCode", "EVN");
 			
@@ -126,7 +128,6 @@ public class PC05MeasureSection extends Elements {
 			comment(doc, exDoc, "This is the title of the eMeasure");
 			
 			element(doc, exDoc, "text", "PC-05 (BF)");
-
 		}
 		
 		private static void patientData(Element ele) throws ParseException 
@@ -255,7 +256,7 @@ public class PC05MeasureSection extends Elements {
 				
 				element(doc, obs, "templateId", "root", "2.16.840.1.113883.10.20.22.4.4", "extension", "2015-08-01");
 	
-				element(doc, obs, "root", "ab1791b0-5c71-11db-b0de-0800200c9a66");
+				element(doc, obs, "id", "root", "ab1791b0-5c71-11db-b0de-0800200c9a66");
 				
 				element(doc, obs, "code", "code", "64572001", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Condition");
 
@@ -299,7 +300,7 @@ public class PC05MeasureSection extends Elements {
 
 				comment(doc, obs, "QDM Attribute: Result");
 
-				element(doc, obs, "value", "xsi:type", "INT", "value", "38", "unit", "wk");
+				element(doc, obs, "value", "xsi:type", "PQ", "value", "38", "unit", "wk");
 
 				Element author = element(doc, obs, "author");
 				
@@ -596,7 +597,7 @@ public class PC05MeasureSection extends Elements {
 
 				element(doc, subAdmin, "statusCode", "code", "completed");
 
-				Element effTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "IVL_TS");
+				Element effTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "PIVL_TS");
 
 				element(doc, effTm, "low", "value", MeasureSets.convertSecondDate(admission, 1500));
 
