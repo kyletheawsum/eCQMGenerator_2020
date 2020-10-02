@@ -27,7 +27,6 @@ public class PC05MeasureSection extends Elements {
 	private static Element elem;
 	private static String reportingPeriodStart;
 	private static String reportingPeriodEnd;
-	
 	private static String admission;
 	public static String discharge;
 	
