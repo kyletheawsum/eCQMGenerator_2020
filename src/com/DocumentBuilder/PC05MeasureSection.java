@@ -596,14 +596,14 @@ public class PC05MeasureSection extends Elements {
 
 				element(doc, subAdmin, "statusCode", "code", "completed");
 
-				Element effTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "PIVL_TS");
+				Element effTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "IVL_TS");
 
 				element(doc, effTm, "low", "value", MeasureSets.convertSecondDate(admission, 1500));
 
 				element(doc, effTm, "high", "value", MeasureSets.convertSecondDate(admission, 1500));
 				
 				comment(doc, subAdmin, "QDM Attribute: Frequency");
-				Element freqEffTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "IVL_TS", "institutionSpecified", "true", "operator", "A");
+				Element freqEffTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "PIVL_TS", "institutionSpecified", "true", "operator", "A");
 				
 				element(doc, freqEffTm, "period", "value", "6", "unit", "h");
 				
