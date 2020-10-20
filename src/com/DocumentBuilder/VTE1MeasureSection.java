@@ -190,7 +190,8 @@ public class VTE1MeasureSection extends Elements {
 			paymentSection(doc, section);
 		}
 			
-			private static void inpatientEncounter(Element ele) throws ParseException {
+			private static void inpatientEncounter(Element ele) throws ParseException 
+			{
 				comment(doc, ele, "QDM Datatype: Encounter, Performed");
 				
 				Element entry = element(doc, ele, "entry");
@@ -288,7 +289,8 @@ public class VTE1MeasureSection extends Elements {
 				}
 			}
 			
-				private static void denominatorExclusion(Element ele, String type, String codeName, String displayName) throws ParseException {
+				private static void denominatorExclusion(Element ele, String type, String codeName, String displayName) throws ParseException 
+				{
 					switch(type) {
 					case "ICU":
 						/**
