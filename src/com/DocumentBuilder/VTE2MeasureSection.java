@@ -12,7 +12,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Comment;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -205,7 +204,7 @@ public class VTE2MeasureSection extends Elements {
 				comment(doc, effTm, "Attribute: discharge datetime");
 				element(doc, effTm, "high", "value", MeasureSets.convertSecondDate(discharge, 1000000));
 
-				// Denominator 
+				// Denominator Exception
 				if(FileCreator.denominatorException == true) {
 					FileCreator.denominatorExclusion = false;
 					denominator(enc, admission, MeasureSets.convertSecondDate(admission, 100000));
@@ -222,8 +221,50 @@ public class VTE2MeasureSection extends Elements {
 				
 				// Denominator Exclusion
 				if(FileCreator.denominatorExclusion == true) {
-					FileCreator.denominatorException = false;
-					denominatorExclusion(ele);
+					discharge = MeasureSets.convertSecondDate(admission, 1000000);
+				} else {
+					discharge = MeasureSets.convertSecondDate(discharge, 1000000);
+				}
+				
+				if(FileCreator.numerator == true) {
+					if(Integer.parseInt(discharge.substring(6, 8)) < Integer.parseInt(admission.substring(6, 8))) {
+						discharge = discharge.replace(discharge.substring(6, 8), Integer.toString(Integer.parseInt(admission.substring(6, 8) + 1)));
+					}
+				}
+				
+				if(FileCreator.denominatorExclusion == true) {
+					if(FileCreator.chckbxRandomize.isSelected()) {
+						String temp = getRand(MeasureParameters.getDenominatorExclusion(15));
+						
+						// diagnosis - entry relationship in encounter
+						if(temp.contains("Diagnose")) {
+							denominatorExclusion(enc, "Diagnosis", null, null); }
+						
+						// procedure - separate entry in section
+						if(temp.toLowerCase().contains("surgery")) {
+							denominatorExclusion(ele, "Procedure", MeasureParameters.denexValues.get(index).toString(), temp); }
+						
+						// observation - comfort measures
+						if(temp.toLowerCase().contains("comfort")) {
+							denominatorExclusion(ele, "observation", null, null); }
+
+						else {}
+					}
+					else {
+						// diagnosis - entry relationship in encounter
+						if(FileCreator.denexBox.getSelectedItem().toString().contains("Diagnose")) {
+							denominatorExclusion(enc, "Diagnosis", null, null); }
+						
+						// procedure - separate entry in section
+						if(FileCreator.denexBox.getSelectedItem().toString().toLowerCase().contains("surgery")) {
+							denominatorExclusion(ele, "Procedure", MeasureParameters.denexValues.get(FileCreator.denexBox.getSelectedIndex()).toString(), FileCreator.denexBox.getSelectedItem().toString()); }
+						
+						// observation - comfort measures
+						if(FileCreator.denexBox.getSelectedItem().toString().toLowerCase().contains("comfort")) {
+							denominatorExclusion(ele, "observation", null, null); }
+
+						else {}
+					}
 				}
 				// End Denominator Exclusion
 				
@@ -232,29 +273,11 @@ public class VTE2MeasureSection extends Elements {
 						String temp = getRand(MeasureParameters.getNumerator(16));
 						
 						// Medication Administered
-						if(temp.contains("Medication")) {
-							numerator(ele, "med", temp.contains("NOT"));
-						}
-						
-						// Device Applied
-						if(temp.contains("Device")) {
-							numerator(ele, "device", temp.contains("NOT"));
-						}
-						
-						else {}
+						numerator(ele, temp.contains("NOT"));
 					}
 					else {
 						// Medication Administered
-						if(FileCreator.numBox.getSelectedItem().toString().toLowerCase().contains("medication")) {
-							numerator(ele, "med", FileCreator.numBox.getSelectedItem().toString().contains("NOT"));
-						}
-						
-						// Device Applied
-						if(FileCreator.numBox.getSelectedItem().toString().toLowerCase().contains("device")) {
-							numerator(ele, "device", FileCreator.numBox.getSelectedItem().toString().contains("NOT"));
-						}
-						
-						else {}
+						numerator(ele,  FileCreator.numBox.getSelectedItem().toString().contains("NOT"));
 					}
 				}			
 			}
@@ -316,7 +339,226 @@ public class VTE2MeasureSection extends Elements {
 					element(doc, obs, "value", "code", "427.31", "codeSystem", "2.16.840.1.113883.6.103", "displayName", "Atrial fibrillation", "xsi:type", "CD");
 				}
 				
+				private static void denominatorExclusion(Element ele, String type, String codeName, String displayName) throws ParseException 
+				{
+					switch(type) {
+					case "Diagnosis":
+						/**
+						 * Mental Health Diagnosis
+						 */
+						comment(doc, ele, "DENOMINATOR EXCLUSION - QDM Attribute: PRINCIPAL DIAGNOSIS");
+						
+						Element qdmEr = element(doc, ele, "entryRelationship", "typeCode", "REFR");
+
+						Element diagObs = element(doc, qdmEr, "observation", "classCode", "OBS", "moodCode", "EVN");
+
+						element(doc, diagObs, "templateId", "root", "2.16.840.1.113883.10.20.24.3.152", "extension", "2017-08-01");
+
+						element(doc, diagObs, "id", "root", "92587992-6147-467e-8ce7-b080ef569df4");
+
+						element(doc, diagObs, "code", "code", "8319008", "codeSystem", "2.16.840.1.113883.6.96", "displayName", "Principal Diagnosis", "codeSystemName", "SNOMED-CT");
+
+						element(doc, diagObs, "value", "code", "195165005", "codeSystem", "2.16.840.1.113883.6.96", "displayName", "Principal Diagnosis", "codeSystemName", "SNOMED-CT", "xsi:type", "CD");	//sdtc:valueSet="2.16.840.1.113883.3.117.1.7.1.212"
+						/**
+						 * END Mental Health Diagnosis
+						 */
+						break;
+					case "Procedure":
+						/**
+						 * Procedure Performed
+						 * applies to `section` element
+						 */
+						comment(doc, ele, "DENOMINATOR EXCLUSIONS - PROCEDURE PERFORMED");
+
+						Element entry = element(doc, ele, "entry", "typeCode", "DRIV");
+
+						Element proc = element(doc, entry, "procedure", "classCode", "PROC", "moodCode", "EVN");
+
+						element(doc, proc, "templateId", "root", "2.16.840.1.113883.10.20.22.4.14", "extension", "2014-06-09");
+
+						element(doc, proc, "templateId", "root", "2.16.840.1.113883.10.20.24.3.64", "extension", "2017-08-01");
+
+						element(doc, proc, "id", "root", "d68b7e32-7810-4f5b-9cc2-acd54b0fd85d");
+
+						comment(doc, proc, "CHANGE HERE FOR DIFFERENT PROCEDURES");
+
+						element(doc, proc, "code", "code", codeName, "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", displayName, "sdtc:valueSet", "2.16.840.1.113883.3.117.1.7.1.255");
+
+						element(doc, proc, "text", "Procedure, Performed");
+
+						element(doc, proc, "statusCode", "code", "completed");
+
+						Element effTm = element(doc, proc, "effectiveTime");
+
+						comment(doc, effTm, "Procedure Start Time");
+
+						element(doc, effTm, "low", "value", MeasureSets.convertSecondDate(admission, 1000000));
+
+						comment(doc, effTm, "Procedure End Time");
+
+						element(doc, effTm, "high", "value", MeasureSets.convertSecondDate(admission, 2000000));
+
+						comment(doc, proc, "QDM ATTRIBUTE: ORDINALITY");
+
+						element(doc, proc, "priorityCode", "code", "63161005", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Principal");
+
+						comment(doc, proc, "QDM ATTRIBUTE: METHOD");
+
+						element(doc, proc, "methodCode", "code", "446223002", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Hand assisted laparoscopic right colectomy");
+
+						comment(doc, proc, "QDM ATTRIBUTE: ANATOMICAL APPROACH SITE");
+
+						element(doc, proc, "approachCode", "code", "14742008", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "large intestinal structure");
+
+						comment(doc, proc, "QDM ATTRIBUTE: ANATOMICAL LOCATION SITE");
+
+						element(doc, proc, "targetSiteCode", "code", "71854001", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "colon");
+
+						comment(doc, proc, "QDM ATTRIBUTE: INCISION DATETIME");
+
+						Element procEr = element(doc, proc, "entryRelationship", "typeCode", "REFR");
+
+						Element erProc = element(doc, procEr, "procedure", "classCode", "PROC", "moodCode", "EVN");
+
+						element(doc, erProc, "templateId", "root", "2.16.840.1.113883.10.20.24.3.89");
+
+						element(doc, erProc, "id", "root", "2d5dc123-13ca-477d-9263-4a9c504186a1");
+
+						element(doc, erProc, "code", "code", "34896006", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "incision");
+
+						element(doc, erProc, "effectiveTime", "value", MeasureSets.convertSecondDate(admission, 1010000));
+						/**
+						 * END Procedure Performed
+						 */
+						break;
+					case "comfort":
+						comment(doc, ele, "DENOMINATOR EXCLUSION: COMFORT MEASURES");
+
+						Element comfortEntry = element(doc, ele, "entry");
+
+						Element act = element(doc, comfortEntry, "act", "classCode", "ACT", "moodCode", "EVN");
+
+						element(doc, act, "templateId", "root", "2.16.840.1.113883.10.20.22.4.12", "extension", "2014-06-09");
+						
+						element(doc, act, "templateId", "root", "2.16.840.1.113883.10.20.24.3.32", "extension", "2017-08-01");
+
+						element(doc, act, "id", "root", "db734647-fc99-424c-a864-7e3cda82e703");
+
+						element(doc, act, "code", "code", "133918004", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Comfort measures (regime/therapy)");	// change here for dif procedures
+
+						element(doc, act, "statusCode", "code", "completed");
+
+						Element comfortEffTm = element(doc, act, "effectiveTime");
+
+						element(doc, comfortEffTm, "low", "value", MeasureSets.convertSecondDate(admission, 1000000));
+
+						element(doc, comfortEffTm, "high", "value", MeasureSets.convertSecondDate(admission, 2000000));
+						/**
+						 * END Comfort Measures
+						 */
+						break;
+					default:
+						break;
+					}
+				}
 				
+				private static void numerator(Element ele, boolean negation) throws DOMException, ParseException
+				{
+					/**
+					 * MEDICATION ADMINISTERED / MEDICATION ADMINISTERED NOT DONE
+					 */
+					comment(doc, ele, "NUMERATOR - MEDICATION");
+
+					Element medEntry = element(doc, ele, "entry");
+
+					Element subAdmin = doc.createElement("substanceAdministration");
+					((Element)subAdmin).setAttribute("classCode", "SBADM");
+					((Element)subAdmin).setAttribute("moodCode", "EVN");
+					
+					if(negation == true) {
+						// negation indicator if not done
+						((Element)subAdmin).setAttribute("negationInd", "true");
+					}
+					medEntry.appendChild(subAdmin);
+					
+					element(doc, subAdmin, "templateId", "root", "2.16.840.1.113883.10.20.22.4.16", "extension", "2014-06-09");
+
+					element(doc, subAdmin, "templateId", "root", "2.16.840.1.113883.10.20.24.3.42", "extension", "2017-08-01");
+
+					element(doc, subAdmin, "id", "root", "9069c123-80ad-47c8-a633-9dc02018ae56");
+
+					element(doc, subAdmin, "statusCode", "code", "completed");
+
+					Element entryEffTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "IVL_TS");
+
+					element(doc, entryEffTm, "low", "value", MeasureSets.convertSecondDate(admission, 10000));
+
+					element(doc, entryEffTm, "high", "value", MeasureSets.convertSecondDate(admission, 10000));
+
+					comment(doc, subAdmin, "QDM ATTRIBUTE: FREQUENCY");
+
+					Element freqEffTm = element(doc, subAdmin, "effectiveTime", "xsi:type", "PIVL_TS", "institutionSpecified", "true", "operator", "A");
+
+					element(doc, freqEffTm, "period", "value", "6", "unit", "h");
+
+					comment(doc, subAdmin, "QDM ATTRIBUTE: DOSE");
+
+					element(doc, subAdmin, "doseQuantity", "value", "1");
+
+					Element con = element(doc, subAdmin, "consumable");
+
+					Element manProd = element(doc, con, "manufacturedProduct", "classCode", "MANU");
+
+					comment(doc, manProd, "Conforms to C-CDA R2.1 Medication Information (V2)");
+
+					element(doc, manProd, "templateId", "root", "2.16.840.1.113883.10.20.22.4.23", "extension", "2014-06-09");
+
+					element(doc, manProd, "id", "root", "37bfe02a-3e97-4bd6-9197-bbd0ed0de79e");
+
+					Element manMat = element(doc, manProd, "manufacturedMaterial");
+
+					
+					Element materialCode = doc.createElement("code");
+					if(negation == true) {
+						((Element)materialCode).setAttribute("nullFlavor", "NA");
+						((Element)materialCode).setAttribute("sdtc:valueSet", "2.16.840.1.113762.1.4.1045.39");
+					} else {
+						((Element)materialCode).setAttribute("code", "855288");
+						((Element)materialCode).setAttribute("codeSystem", "2.16.840.1.113883.6.88");
+						//((Element)materialCode).setAttribute("codeSystemName", "RxNorm");
+						//((Element)materialCode).setAttribute("displayName", "100 ML heparin sodium, porcine 100 UNT/ML Injection");
+						//((Element)materialCode).setAttribute("sdtc:valueSet", "2.16.840.1.113883.3.117.1.7.1.218");
+					}
+					manMat.appendChild(materialCode);		
+					
+					element(doc, materialCode, "originalText", "None of value set: Low Dose Unfractionated Heparin for VTE Prophylaxis");
+
+					Element medAuth = element(doc, subAdmin, "author");
+
+					element(doc, medAuth, "templateId", "root", "2.16.840.1.113883.10.20.24.3.155", "extension", "2017-08-01");
+
+					element(doc, medAuth, "time", "value", MeasureSets.convertSecondDate(admission, 10000));
+
+					Element medAssAuth = element(doc, medAuth, "assignedAuthor");
+
+					element(doc, medAssAuth, "id", "nullFlavor", "NA");
+
+					
+					if(negation == true) {
+						comment(doc, subAdmin, "REASON FOR \"NOT\" DONE");
+
+						Element medErNeg = element(doc, subAdmin, "entryRelationship", "typeCode", "RSON");
+
+						Element medNegObs = element(doc, medErNeg, "observation", "classCode", "OBS", "moodCode", "EVN");
+
+						element(doc, medNegObs, "templateId", "root", "2.16.840.1.113883.10.20.24.3.88", "extension", "2017-08-01");
+
+						element(doc, medNegObs, "code", "code", "77301-0", "codeSystem", "2.16.840.1.113883.6.1", "codeSystemName", "LOINC", "displayName", "Reason care action performed or not");
+
+						element(doc, medNegObs, "value", "code", "182903008", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Drug declined by patient – reason unknown (situation)", "xsi:type", "CD");
+						//((Element)devNegValue).setAttribute("sdtc:valueSet", "2.16.840.1.113883.3.117.1.7.1.93");
+					}
+				}
 				
 	static int index;
 	private static String getRand(String[] stArr) {
