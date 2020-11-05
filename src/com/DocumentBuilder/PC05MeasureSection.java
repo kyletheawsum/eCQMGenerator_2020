@@ -291,7 +291,7 @@ public class PC05MeasureSection extends Elements {
 				
 				element(doc, obs, "id", "root", "d55c711a-f958-4807-bdb6-45fe5b6195c0");
 				
-				element(doc, obs, "code", "code", "412726003", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "LOINC", "displayName", "Length of gestation at birth (observable entity)");
+				element(doc, obs, "code", "code", "76516-4", "codeSystem", "2.16.840.1.113883.6.1", "codeSystemName", "LOINC", "displayName", "Unknown Code");
 				
 				element(doc, obs, "text", "Assessment Performed: Length of gestation at birth (observable entity)");
 

@@ -162,7 +162,7 @@ public class VTE1MeasureSection extends Elements {
 			
 			if(FileCreator.numerator == true) {
 				if(FileCreator.chckbxRandomize.isSelected()) {
-					String temp = getRand(MeasureParameters.getNumerator(15));
+					String temp = getRand(MeasureParameters.getNumerator(7));
 					
 					// Medication Administered
 					if(temp.contains("Medication")) {
@@ -247,7 +247,7 @@ public class VTE1MeasureSection extends Elements {
 				
 				if(FileCreator.denominatorExclusion == true) {
 					if(FileCreator.chckbxRandomize.isSelected()) {
-						String temp = getRand(MeasureParameters.getDenominatorExclusion(15));
+						String temp = getRand(MeasureParameters.getDenominatorExclusion(7));
 						
 						// ICU - participant in encounter
 						if(temp.toUpperCase().contains("ICU")) {
@@ -310,7 +310,7 @@ public class VTE1MeasureSection extends Elements {
 
 						element(doc, time, "low", "value", admission);
 
-						element(doc, time, "high", MeasureSets.convertSecondDate(admission, 1000000));
+						element(doc, time, "high", "value", MeasureSets.convertSecondDate(admission, 1000000));
 
 						comment(doc, participant, "INTENSIVE CARE UNIT");
 

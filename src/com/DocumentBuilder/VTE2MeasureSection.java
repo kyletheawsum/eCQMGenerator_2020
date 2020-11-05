@@ -234,7 +234,7 @@ public class VTE2MeasureSection extends Elements {
 				
 				if(FileCreator.denominatorExclusion == true) {
 					if(FileCreator.chckbxRandomize.isSelected()) {
-						String temp = getRand(MeasureParameters.getDenominatorExclusion(15));
+						String temp = getRand(MeasureParameters.getDenominatorExclusion(8));
 						
 						// diagnosis - entry relationship in encounter
 						if(temp.contains("Diagnose")) {
@@ -270,7 +270,7 @@ public class VTE2MeasureSection extends Elements {
 				
 				if(FileCreator.numerator == true) {
 					if(FileCreator.chckbxRandomize.isSelected()) {
-						String temp = getRand(MeasureParameters.getNumerator(16));
+						String temp = getRand(MeasureParameters.getNumerator(8));
 						
 						// Medication Administered
 						numerator(ele, temp.contains("NOT"));
@@ -436,23 +436,27 @@ public class VTE2MeasureSection extends Elements {
 
 						Element comfortEntry = element(doc, ele, "entry");
 
-						Element act = element(doc, comfortEntry, "act", "classCode", "ACT", "moodCode", "EVN");
+						Element act = element(doc, comfortEntry, "act", "classCode", "ACT", "moodCode", "RQO");
 
-						element(doc, act, "templateId", "root", "2.16.840.1.113883.10.20.22.4.12", "extension", "2014-06-09");
+						element(doc, act, "templateId", "root", "2.16.840.1.113883.10.20.22.4.39", "extension", "2014-06-09");
 						
-						element(doc, act, "templateId", "root", "2.16.840.1.113883.10.20.24.3.32", "extension", "2017-08-01");
+						element(doc, act, "templateId", "root", "2.16.840.1.113883.10.20.24.3.31", "extension", "2017-08-01");
 
 						element(doc, act, "id", "root", "db734647-fc99-424c-a864-7e3cda82e703");
 
 						element(doc, act, "code", "code", "133918004", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Comfort measures (regime/therapy)");	// change here for dif procedures
 
-						element(doc, act, "statusCode", "code", "completed");
-
-						Element comfortEffTm = element(doc, act, "effectiveTime");
-
-						element(doc, comfortEffTm, "low", "value", MeasureSets.convertSecondDate(admission, 1000000));
-
-						element(doc, comfortEffTm, "high", "value", MeasureSets.convertSecondDate(admission, 2000000));
+						element(doc, act, "statusCode", "code", "active");
+						
+						Element auth = element(doc, act, "author");
+						
+						element(doc, auth, "templateId", "root", "2.16.840.1.113883.10.20.24.3.155", "extension", "2017-08-01");
+						
+						element(doc, auth, "time", "value", admission);
+						
+						Element assAuth = element(doc, auth, "assignedAuthor");
+						
+						element(doc, assAuth, "id", "nullFlavor", "NA");
 						/**
 						 * END Comfort Measures
 						 */
