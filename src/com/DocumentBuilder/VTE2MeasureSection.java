@@ -559,7 +559,7 @@ public class VTE2MeasureSection extends Elements {
 
 						element(doc, medNegObs, "code", "code", "77301-0", "codeSystem", "2.16.840.1.113883.6.1", "codeSystemName", "LOINC", "displayName", "Reason care action performed or not");
 
-						element(doc, medNegObs, "value", "code", "182903008", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Drug declined by patient – reason unknown (situation)", "xsi:type", "CD");
+						element(doc, medNegObs, "value", "code", "182903008", "codeSystem", "2.16.840.1.113883.6.96", "codeSystemName", "SNOMED CT", "displayName", "Drug declined by patient : reason unknown (situation)", "xsi:type", "CD");
 						//((Element)devNegValue).setAttribute("sdtc:valueSet", "2.16.840.1.113883.3.117.1.7.1.93");
 					}
 				}
